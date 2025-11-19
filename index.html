@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Squaring the Circle, Circling the Square</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <link rel="icon" href="favicon.png" sizes="512x512" />
+
+    <style>
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+      }
+      .wrap {
+        width: 100vw;
+        height: 100vh;
+        display: grid;
+        place-items: stretch;
+        font-family: "Inter", system-ui, -apple-system, Segoe UI, Roboto, Arial,
+          sans-serif;
+        font-weight: 400;
+      }
+
+      .grid {
+        position: relative;
+        width: 100%;
+        height: 100%;
+      }
+
+      .cells {
+        display: grid;
+        grid-template-columns: repeat(6, 1fr);
+        grid-template-rows: repeat(4, 1fr);
+        width: 100%;
+        height: 100%;
+      }
+
+      .cells > .cell {
+        position: relative;
+        box-sizing: border-box;
+        border-top: 1px solid #000;
+        border-left: 1px solid #000;
+        overflow: hidden;
+      }
+
+      .cells > .cell:nth-child(6n) {
+        border-right: 1px solid #000;
+      }
+      .cells > .cell:nth-child(n + 19) {
+        border-bottom: 1px solid #000;
+      }
+
+      .cells > .cell:nth-child(n + 14):nth-child(-n + 17) {
+        border-top: 0;
+      }
+      .cells > .cell:nth-child(n + 9):nth-child(-n + 11),
+      .cells > .cell:nth-child(n + 15):nth-child(-n + 17) {
+        border-left: 0;
+      }
+
+      .cell img {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+        user-select: none;
+        -webkit-user-drag: none;
+      }
+      .img-base {
+        opacity: 1;
+        transition: opacity 140ms linear;
+      }
+      .img-alt {
+        opacity: 0;
+        transition: opacity 140ms linear;
+        pointer-events: none;
+      }
+
+      .stamps {
+        position: absolute;
+        left: 6px;
+        bottom: 6px;
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        max-width: 70%;
+        z-index: 2;
+      }
+
+      .stamp {
+        padding: 1px 4px;
+        font-family: "Source Code Pro", ui-monospace, SFMono-Regular, Menlo,
+          Consolas, "Liberation Mono", monospace;
+        font-size: 10px;
+        line-height: 1.1;
+        color: #000;
+        border: 1px solid rgba(0, 0, 0, 0.35);
+        border-radius: 2px;
+        cursor: pointer;
+        white-space: nowrap;
+        transition: font-weight 120ms linear;
+        font-weight: 400;
+      }
+      .stamp--yellow {
+        background: rgba(255, 255, 0, 0.95);
+      }
+      .stamp--gray {
+        background: rgba(204, 204, 204, 0.95);
+      }
+
+      .stamp:hover,
+      .stamp.active {
+        font-weight: 700;
+      }
+      .stamp:focus-visible {
+        outline: 2px solid #000;
+        outline-offset: 2px;
+      }
+
+      .note {
+        position: absolute;
+        inset: 0;
+        padding: 6px 8px;
+        font: inherit;
+        font-size: 11px;
+        line-height: 1.3;
+        color: #000;
+        opacity: 0;
+        overflow: auto;
+        white-space: pre-wrap;
+        transition: opacity 120ms linear;
+        z-index: 3;
+        pointer-events: none;
+        background: none;
+        border: 0;
+      }
+      .note.show {
+        opacity: 1;
+        pointer-events: auto;
+      }
+
+      .title-label {
+        position: absolute;
+        font: inherit;
+        font-size: 11px;
+        line-height: 1;
+        z-index: 4;
+        pointer-events: none;
+        letter-spacing: 0.02em;
+      }
+      .title-label.tl {
+        left: 8px;
+        bottom: 8px;
+        text-align: left;
+      }
+      .title-label.tl {
+        right: 8px;
+        top: 8px;
+        text-align: left;
+      }
+
+      .expand-overlay {
+        position: absolute;
+        z-index: 6;
+        display: none;
+        left: 0;
+        top: 0;
+        width: 0;
+        height: 0;
+        pointer-events: none;
+        background: #000;
+      }
+      .expand-overlay.show {
+        display: block;
+      }
+
+      .expand-img {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        user-select: none;
+        -webkit-user-drag: none;
+        -webkit-mask: radial-gradient(
+          circle at center,
+          #000 0%,
+          #000 65%,
+          transparent 65%
+        );
+        mask: radial-gradient(
+          circle at center,
+          #000 0%,
+          #000 65%,
+          transparent 65%
+        );
+      }
+
+      .click-text {
+        position: absolute;
+        color: #000;
+        padding: 8px 8px;
+        font-size: 11px;
+        line-height: 1.25;
+        z-index: 7;
+        pointer-events: none;
+      }
+      .click-text.hidden {
+        display: none;
+      }
+
+      .orbit-char {
+        position: absolute;
+        font-size: 11px;
+        line-height: 1.25;
+        color: #fff;
+        pointer-events: none;
+        transform: translate(-50%, -50%);
+        z-index: 7;
+      }
+      .orbit-char.hidden {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="grid" id="grid">
+        <div class="cells">
+          <div class="cell"></div>
+          <div class="cell"></div>
+          <div class="cell"></div>
+          <div class="cell"></div>
+          <div class="cell"></div>
+          <div class="cell"></div>
+          <div class="cell"></div>
+          <div class="cell"></div>
+          <div class="cell"></div>
+          <div class="cell"></div>
+          <div class="cell"></div>
+          <div class="cell"></div>
+          <div class="cell"></div>
+          <div class="cell"></div>
+          <div class="cell"></div>
+          <div class="cell"></div>
+          <div class="cell"></div>
+          <div class="cell"></div>
+          <div class="cell"></div>
+          <div class="cell"></div>
+          <div class="cell"></div>
+          <div class="cell"></div>
+          <div class="cell"></div>
+          <div class="cell"></div>
+        </div>
+
+        <div class="expand-overlay" id="expandOverlay" aria-hidden="true">
+          <img class="expand-img" id="expandImg" alt="" />
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const COLS = 6,
+        ROWS = 4;
+      const gridEl = document.getElementById("grid");
+      const cells = [...document.querySelectorAll(".cells > .cell")];
+      const gridData = [
+        // Row 1
+        { base: "001_pollak.png" },
+        {
+          base: "002_pollak.png",
+          alts: [
+            {
+              stamp: "Yomna Abdelkader",
+              src: "002_yomna.png",
+              big: "image02_bigA.png",
+              text: "Lorem ipsum...",
+              color: "gray",
+            },
+          ],
+        },
+        { base: "003_pollak.png", alts: [] },
+        {
+          base: "004_pollak.png",
+          alts: [],
+        },
+        { base: "005_pollak.png", alts: [] },
+        {
+          base: "006_pollak.png",
+          alts: [
+            {
+              stamp: "Adrienne Bennett",
+              src: "006_adrienne.png",
+              big: "adrienne_big_822.png",
+              text: "Lorem ipsum...",
+              color: "gray",
+            },
+          ],
+        },
+
+        // Row 2
+        {
+          base: "007_pollak.png",
+          alts: [],
+        },
+        { base: "", alts: [] },
+        { base: "", alts: [] },
+        { base: "", alts: [] },
+        { base: "", alts: [] },
+        {
+          base: "008_pollak.png",
+          alts: [],
+        },
+
+        // Row 3
+        {
+          base: "009_pollak.png",
+          alts: [
+            {
+              stamp: "Yomna Abdelkader",
+              src: "yomna_small_pollak.jpg",
+              big: "yomna_big_pollak.jpg",
+              text: "A projection using plates to explore family, identity, and change, showing how difference, memory, and belonging coexist across generations and places.",
+              color: "yellow",
+            },
+          ],
+        },
+        { base: "", alts: [] },
+        { base: "", alts: [] },
+        { base: "", alts: [] },
+        { base: "", alts: [] },
+        {
+          base: "010_pollak.png",
+          alts: [
+            {
+              stamp: "Charles O'Leary",
+              src: "charles_small_pollak2.png",
+              big: "charles_big_pollak2.png",
+              text: "In 2019, Charles O'Leary fell in love. Soon, their paramour FaceApp's belly began to swell, and Baby _____ O'Leary was born less than a year later. Machine, Learning celebrates this newfound life.",
+              color: "yellow",
+            },
+          ],
+        },
+
+        // Row 4
+        {
+          base: "011_pollak.png",
+          alts: [
+            {
+              stamp: "Charles O'Leary",
+              src: "charles_small_pollak1.png",
+              big: "charles_big_pollak1.png",
+              text: "In 2019, Charles O'Leary fell in love. Soon, their paramour FaceApp's belly began to swell, and Baby _____ O'Leary was born less than a year later. Machine, Learning celebrates this newfound life.",
+              color: "yellow",
+            },
+            {
+              stamp: "Charles O'Leary",
+              src: "011_charles.png",
+              big: "charles_big_822.png",
+              text: "Lorem ipsum...",
+              color: "gray",
+            },
+          ],
+        },
+        { base: "012_pollak.png" },
+        {
+          base: "013_pollak.png",
+          alts: [
+            {
+              stamp: "Mati Schank",
+              src: "mati_small_pollak.jpg",
+              big: "mati_big_pollak.jpg",
+              text: "A plastic sheath of jelly ink leaks the image. The stain is transformed into a horse, a purified substance depicting optimized strength.",
+              color: "yellow",
+            },
+          ],
+        },
+        {
+          base: "014_pollak.png",
+          alts: [
+            {
+              stamp: "Adrienne Bennett",
+              src: "adrienne_small_pollak.jpeg",
+              big: "adrienne_big_pollak.jpeg",
+              text: "Lorem ipsum...",
+              color: "yellow",
+            },
+            {
+              stamp: "Mati Schank",
+              src: "014_mati.png",
+              big: "mati_big_822.jpeg",
+              text: "Lorem ipsum...",
+              color: "gray",
+            },
+          ],
+        },
+        { base: "015_pollak.png" },
+        { base: "016_pollak.png" },
+      ];
+
+      const toIndex = (r, c) =>
+        r < 0 || r >= ROWS || c < 0 || c >= COLS ? -1 : r * COLS + c;
+      const isEmpty = gridData.map((item) => !item || !item.base);
+
+      function setAltForCell(i, src) {
+        const alt = cells[i].querySelector(".img-alt");
+        if (!alt) return;
+        if (src) alt.src = src;
+        alt.style.opacity = "1";
+      }
+      function hideAltForCell(i) {
+        const alt = cells[i].querySelector(".img-alt");
+        if (alt) alt.style.opacity = "0";
+      }
+
+      const overlay = document.getElementById("expandOverlay");
+      const overlayImg = document.getElementById("expandImg");
+
+      const ORBIT_MESSAGE = "Project loads on December 5";
+      const orbitChars = [];
+
+      for (let i = 0; i < ORBIT_MESSAGE.length; i++) {
+        const span = document.createElement("span");
+        span.className = "orbit-char hidden";
+        span.textContent = ORBIT_MESSAGE[i];
+        overlay.appendChild(span);
+        orbitChars.push(span);
+      }
+
+      let orbitAnimationId = null;
+      let orbitAngle = 0;
+
+      function startOrbit() {
+        orbitAngle = 0;
+
+        orbitChars.forEach((ch) => ch.classList.remove("hidden"));
+
+        const overlayRect = overlay.getBoundingClientRect();
+        const centerX = overlayRect.width / 2;
+        const centerY = overlayRect.height / 2;
+        const radius = Math.min(overlayRect.width, overlayRect.height) * 0.35;
+        const spacing = 0.055;
+
+        if (orbitAnimationId) {
+          cancelAnimationFrame(orbitAnimationId);
+          orbitAnimationId = null;
+        }
+
+        function step() {
+          orbitAngle += 0.004;
+
+          orbitChars.forEach((ch, index) => {
+            const angle = orbitAngle + index * spacing;
+
+            const x = centerX + radius * Math.cos(angle);
+            const y = centerY + radius * Math.sin(angle);
+
+            ch.style.left = x + "px";
+            ch.style.top = y + "px";
+          });
+
+          orbitAnimationId = requestAnimationFrame(step);
+        }
+
+        step();
+      }
+
+      function stopOrbit() {
+        if (orbitAnimationId) {
+          cancelAnimationFrame(orbitAnimationId);
+          orbitAnimationId = null;
+        }
+        orbitChars.forEach((ch) => ch.classList.add("hidden"));
+      }
+
+      const LEFT_TEXT_IDX = toIndex(1, 4); // row2 col5
+      const RIGHT_TEXT_IDX = toIndex(1, 1); // row2 col2
+      const leftTextEl = document.createElement("div");
+      leftTextEl.className = "click-text hidden";
+      cells[LEFT_TEXT_IDX].appendChild(leftTextEl);
+      const rightTextEl = document.createElement("div");
+      rightTextEl.className = "click-text hidden";
+      cells[RIGHT_TEXT_IDX].appendChild(rightTextEl);
+      let activeCellIndex = null;
+      const latchedAltByCell = Array(cells.length).fill(null);
+
+      function resetStampVisual(btn) {
+        btn.classList.remove("active");
+      }
+
+      function hideClickUI() {
+        overlay.classList.remove("show");
+        overlayImg.src = "";
+        overlayImg.style.display = "block"; // reset for yellow mode
+        leftTextEl.classList.add("hidden");
+        rightTextEl.classList.add("hidden");
+        stopOrbit(); // stop gray-orbit animation if running
+
+        // clear clicked visuals
+        document.querySelectorAll(".stamp.active").forEach(resetStampVisual);
+
+        // clear latched alt (if any)
+        if (activeCellIndex !== null) {
+          hideAltForCell(activeCellIndex);
+          latchedAltByCell[activeCellIndex] = null;
+          activeCellIndex = null;
+        }
+
+        // reset opening label to its default position when overlay closes
+        openingLayout = "default";
+        renderOpeningLabel();
+      }
+
+
+      // union rect of a 2×2 block (rows x cols) relative to .grid
+      function getUnionRect(rows, cols) {
+        const gridRect = gridEl.getBoundingClientRect();
+        const rects = [];
+        rows.forEach((r) =>
+          cols.forEach((c) => {
+            const idx = toIndex(r, c);
+            const rect = cells[idx].getBoundingClientRect();
+            rects.push({
+              left: rect.left - gridRect.left,
+              top: rect.top - gridRect.top,
+              right: rect.right - gridRect.left,
+              bottom: rect.bottom - gridRect.top,
+            });
+          })
+        );
+        const left = Math.min(...rects.map((r) => r.left));
+        const top = Math.min(...rects.map((r) => r.top));
+        const right = Math.max(...rects.map((r) => r.right));
+        const bottom = Math.max(...rects.map((r) => r.bottom));
+        return { left, top, width: right - left, height: bottom - top };
+      }
+
+      function showClickUI(side, src, text) {
+        const rows = [1, 2]; // rows 2–3 (0-based)
+        const cols = side === "left" ? [1, 2] : [3, 4]; // cols 2–3 or 4–5
+        const rect = getUnionRect(rows, cols);
+
+        Object.assign(overlay.style, {
+          left: rect.left + "px",
+          top: rect.top + "px",
+          width: rect.width + "px",
+          height: rect.height + "px",
+        });
+
+        if (side === "left") {
+          rightTextEl.classList.add("hidden");
+          if (text) {
+            leftTextEl.textContent = text;
+            leftTextEl.classList.remove("hidden");
+          } else {
+            leftTextEl.classList.add("hidden");
+          }
+        } else {
+          leftTextEl.classList.add("hidden");
+          if (text) {
+            rightTextEl.textContent = text;
+            rightTextEl.classList.remove("hidden");
+          } else {
+            rightTextEl.classList.add("hidden");
+          }
+        }
+
+        overlayImg.src = src || "";
+        overlay.classList.add("show");
+        openingLayout = side === "right" ? "alt" : "default";
+        renderOpeningLabel();
+      }
+
+      cells.forEach((cell, i) => {
+        const item = gridData[i] || { base: "", alts: [] };
+
+        if (item.base) {
+          const base = document.createElement("img");
+          base.className = "img-base";
+          base.src = item.base;
+          base.alt = `Cell ${i + 1} base`;
+          cell.appendChild(base);
+        }
+
+        const alt = document.createElement("img");
+        alt.className = "img-alt";
+        alt.alt = `Cell ${i + 1} alt`;
+        cell.appendChild(alt);
+
+        (item.alts || []).forEach((a) => {
+          const pre = new Image();
+          pre.src = a.src;
+          if (a.big) {
+            const preB = new Image();
+            preB.src = a.big;
+          }
+        });
+
+        if (item.alts && item.alts.length) {
+          const list = document.createElement("div");
+          list.className = "stamps";
+
+          item.alts.forEach((a) => {
+            const btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = "stamp";
+            const color =
+              a.color === "gray" || a.color === "yellow" ? a.color : "yellow";
+            btn.classList.add(`stamp--${color}`);
+            btn.textContent = a.stamp;
+
+            btn.addEventListener("mouseenter", () => {
+              setAltForCell(i, a.src);
+            });
+
+            btn.addEventListener("mouseleave", () => {
+              if (latchedAltByCell[i]) {
+                setAltForCell(i, latchedAltByCell[i]);
+              } else {
+                hideAltForCell(i);
+              }
+            });
+
+            btn.addEventListener("click", (ev) => {
+              ev.stopPropagation();
+
+              const already =
+                btn.classList.contains("active") &&
+                overlay.classList.contains("show");
+              if (already) {
+                hideClickUI();
+                return;
+              }
+
+              document
+                .querySelectorAll(".stamp.active")
+                .forEach(resetStampVisual);
+
+              if (activeCellIndex !== null && activeCellIndex !== i) {
+                hideAltForCell(activeCellIndex);
+                latchedAltByCell[activeCellIndex] = null;
+              }
+
+              btn.classList.add("active");
+              setAltForCell(i, a.src);
+              latchedAltByCell[i] = a.src;
+              activeCellIndex = i;
+
+              const rect = cell.getBoundingClientRect();
+              const side =
+                rect.left + rect.width / 2 < window.innerWidth / 2
+                  ? "left"
+                  : "right";
+
+              if (color === "yellow") {
+                stopOrbit(); // in case a gray orbit was running
+                overlayImg.style.display = "block";
+
+                const bigSrc = a.big || a.src || "";
+                const text = a.text || a.stamp || "";
+                showClickUI(side, bigSrc, text);
+              } else {
+                overlayImg.style.display = "none";
+                showClickUI(side, "", ""); // positions overlay & hides left/right click-text
+                startOrbit();
+              }
+            });
+
+            list.appendChild(btn);
+          });
+
+          cell.appendChild(list);
+        }
+      });
+
+      const isEmptyArr = gridData.map((item) => !item || !item.base);
+
+      function placeWordsInRow(words, rowIndex, cornerClass) {
+        let placed = 0;
+        for (let c = 0; c < COLS && placed < words.length; c++) {
+          const idx = rowIndex * COLS + c;
+          if (isEmptyArr[idx]) {
+            const label = document.createElement("div");
+            label.className = `title-label ${cornerClass}`;
+            label.textContent = words[placed++];
+            cells[idx].appendChild(label);
+          }
+        }
+      }
+
+      const OPENING_TEXT = "Opening 7 PM, December 5, 822 W Broad St.";
+      const OPENING_ROW_INDEX = 1; // row 2 (0-based)
+      let openingLayout = "default"; // "default" or "alt"
+
+      function renderOpeningLabel() {
+        document
+          .querySelectorAll(".title-label.opening-label")
+          .forEach((el) => el.remove());
+
+        const emptyIndices = [];
+        for (let c = 0; c < COLS; c++) {
+          const idx = OPENING_ROW_INDEX * COLS + c;
+          if (isEmptyArr[idx]) emptyIndices.push(idx);
+        }
+        if (emptyIndices.length === 0) return;
+
+        const targetIndex =
+          openingLayout === "alt"
+            ? emptyIndices[1] // second empty cell in the row
+            : emptyIndices[2]; // third empty cell in the row
+
+        const label = document.createElement("div");
+        label.className = "title-label tl opening-label";
+        label.textContent = OPENING_TEXT;
+        cells[targetIndex].appendChild(label);
+      }
+
+      // initial placement of opening text (default pattern)
+      renderOpeningLabel();
+
+      placeWordsInRow(
+        ["Squaring the Circle", "", "", "Circling the Square"],
+        2,
+        "tl"
+      );
+
+      window.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") hideClickUI();
+      });
+      window.addEventListener("resize", () => {
+        if (overlay.classList.contains("show")) hideClickUI();
+      });
+    </script>
+  </body>
+</html>

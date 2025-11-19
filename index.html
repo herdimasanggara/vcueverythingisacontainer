@@ -155,11 +155,13 @@
         position: absolute;
         font: inherit;
         font-size: 11px;
-        line-height: 1;
+        line-height: 1.25;
         z-index: 4;
         pointer-events: none;
         letter-spacing: 0.02em;
+        white-space: pre-line;
       }
+
       .title-label.tl {
         left: 8px;
         bottom: 8px;
@@ -523,7 +525,6 @@
         renderOpeningLabel();
       }
 
-
       // union rect of a 2×2 block (rows x cols) relative to .grid
       function getUnionRect(rows, cols) {
         const gridRect = gridEl.getBoundingClientRect();
@@ -700,7 +701,7 @@
         }
       }
 
-      const OPENING_TEXT = "Opening 7 PM, December 5, 822 W Broad St.";
+      const OPENING_TEXT = "Opening 7 PM\nDecember 5\n822 W Broad St.";
       const OPENING_ROW_INDEX = 1; // row 2 (0-based)
       let openingLayout = "default"; // "default" or "alt"
 

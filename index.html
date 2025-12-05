@@ -130,15 +130,14 @@
       }
 
       .stamps-topright {
-  position: absolute;
-  right: 6px;
-  top: 6px;
-  display: flex;
-  gap: 4px;
-  flex-wrap: wrap;
-  z-index: 3;
-}
-
+        position: absolute;
+        right: 6px;
+        top: 6px;
+        display: flex;
+        gap: 4px;
+        flex-wrap: wrap;
+        z-index: 3;
+      }
 
       .note {
         position: absolute;
@@ -558,9 +557,17 @@
       function setAltForCell(i, src) {
         const alt = cells[i].querySelector(".img-alt");
         if (!alt) return;
-        if (src) alt.src = src;
-        alt.style.opacity = "1";
+
+        if (src && alt.src !== src) {
+          // force-update before making it visible
+          alt.style.opacity = "0"; // hide momentarily to avoid “alt text flash”
+          alt.src = src; // update immediately
+          alt.onload = () => (alt.style.opacity = "1");
+        } else {
+          alt.style.opacity = "1"; // already has correct src
+        }
       }
+
       function hideAltForCell(i) {
         const alt = cells[i].querySelector(".img-alt");
         if (alt) alt.style.opacity = "0";
@@ -749,84 +756,85 @@
         });
 
         if (item.alts && item.alts.length) {
-  const bottomList = document.createElement("div");
-  bottomList.className = "stamps";
+          const bottomList = document.createElement("div");
+          bottomList.className = "stamps";
 
-  const topRightList = document.createElement("div");
-  topRightList.className = "stamps-topright";
+          const topRightList = document.createElement("div");
+          topRightList.className = "stamps-topright";
 
-  item.alts.forEach((a) => {
-    const btn = document.createElement("button");
-    btn.type = "button";
-    btn.className = "stamp";
+          item.alts.forEach((a) => {
+            const btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = "stamp";
 
-    const color =
-      a.color === "gray" || a.color === "yellow" ? a.color : "yellow";
-    btn.classList.add(`stamp--${color}`);
-    btn.textContent = a.stamp;
+            const color =
+              a.color === "gray" || a.color === "yellow" ? a.color : "yellow";
+            btn.classList.add(`stamp--${color}`);
+            btn.textContent = a.stamp;
 
-    // HOVER
-    btn.addEventListener("mouseenter", () => setAltForCell(i, a.src));
-    btn.addEventListener("mouseleave", () => {
-      latchedAltByCell[i]
-        ? setAltForCell(i, latchedAltByCell[i])
-        : hideAltForCell(i);
-    });
+            // HOVER
+            btn.addEventListener("mouseenter", () => setAltForCell(i, a.src));
+            btn.addEventListener("mouseleave", () => {
+              latchedAltByCell[i]
+                ? setAltForCell(i, latchedAltByCell[i])
+                : hideAltForCell(i);
+            });
 
-    // CLICK
-    btn.addEventListener("click", (ev) => {
-      // KEEP YOUR ORIGINAL ENTIRE CLICK HANDLER HERE
-      // (copy/paste from your existing code)
-      ev.stopPropagation();
+            // CLICK
+            btn.addEventListener("click", (ev) => {
+              // KEEP YOUR ORIGINAL ENTIRE CLICK HANDLER HERE
+              // (copy/paste from your existing code)
+              ev.stopPropagation();
 
-      const already =
-        btn.classList.contains("active") &&
-        overlay.classList.contains("show");
-      if (already) {
-        hideClickUI();
-        return;
-      }
+              const already =
+                btn.classList.contains("active") &&
+                overlay.classList.contains("show");
+              if (already) {
+                hideClickUI();
+                return;
+              }
 
-      document.querySelectorAll(".stamp.active").forEach(resetStampVisual);
+              document
+                .querySelectorAll(".stamp.active")
+                .forEach(resetStampVisual);
 
-      if (activeCellIndex !== null && activeCellIndex !== i) {
-        hideAltForCell(activeCellIndex);
-        latchedAltByCell[activeCellIndex] = null;
-      }
+              if (activeCellIndex !== null && activeCellIndex !== i) {
+                hideAltForCell(activeCellIndex);
+                latchedAltByCell[activeCellIndex] = null;
+              }
 
-      btn.classList.add("active");
-      setAltForCell(i, a.src);
-      latchedAltByCell[i] = a.src;
-      activeCellIndex = i;
+              btn.classList.add("active");
+              setAltForCell(i, a.src);
+              latchedAltByCell[i] = a.src;
+              activeCellIndex = i;
 
-      const rect = cell.getBoundingClientRect();
-      const side =
-        rect.left + rect.width / 2 < window.innerWidth / 2
-          ? "left"
-          : "right";
+              const rect = cell.getBoundingClientRect();
+              const side =
+                rect.left + rect.width / 2 < window.innerWidth / 2
+                  ? "left"
+                  : "right";
 
-      // Always show image now
-      stopOrbit();
-      overlayImg.style.display = "block";
-      const bigSrc = a.big || a.src || "";
-      const text = a.text || a.stamp || "";
-      showClickUI(side, bigSrc, text);
-    });
+              // Always show image now
+              stopOrbit();
+              overlayImg.style.display = "block";
+              const bigSrc = a.big || a.src || "";
+              const text = a.text || a.stamp || "";
+              showClickUI(side, bigSrc, text);
+            });
 
-    // ⬇️ NEW: number-stamps → top-right
-    const isNumberStamp = /^[0-9]{2}$/.test(a.stamp);
+            // ⬇️ NEW: number-stamps → top-right
+            const isNumberStamp = /^[0-9]{2}$/.test(a.stamp);
 
-    if (isNumberStamp) {
-      topRightList.appendChild(btn);
-    } else {
-      bottomList.appendChild(btn);
-    }
-  });
+            if (isNumberStamp) {
+              topRightList.appendChild(btn);
+            } else {
+              bottomList.appendChild(btn);
+            }
+          });
 
-  if (bottomList.children.length) cell.appendChild(bottomList);
-  if (topRightList.children.length) cell.appendChild(topRightList);
-}
-
+          if (bottomList.children.length) cell.appendChild(bottomList);
+          if (topRightList.children.length) cell.appendChild(topRightList);
+        }
       });
 
       const isEmptyArr = gridData.map((item) => !item || !item.base);
@@ -886,29 +894,60 @@
       window.addEventListener("resize", () => {
         if (overlay.classList.contains("show")) hideClickUI();
       });
-      /* ---------------- AUTO-PLAY: RANDOM STAMP CLICK EVERY 10 SECONDS ---------------- */
+      /* ---------------- AUTO-PLAY (SAFE VERSION) ---------------- */
 
-function getAllStamps() {
-  return [...document.querySelectorAll(".stamp")];
-}
+      function systemStable() {
+        // overlay is in the middle of showing/hiding
+        if (overlay.classList.contains("animating")) return false;
 
-function clickRandomStamp() {
-  const stamps = getAllStamps();
-  if (stamps.length === 0) return;
+        // delay after user manually interacts
+        if (Date.now() - lastUserInteraction < 500) return false;
 
-  // pick a random clickable stamp
-  const btn = stamps[Math.floor(Math.random() * stamps.length)];
+        // prevent auto-click when unlatched state is transitioning
+        if (activeCellIndex !== null && !latchedAltByCell[activeCellIndex])
+          return false;
 
-  // simulate a real click
-  btn.click();
-}
+        return true;
+      }
 
-// start autoplay 10 seconds after page load, then every 10 seconds
-setTimeout(() => {
-  clickRandomStamp(); // first auto-click
-  setInterval(clickRandomStamp, 10000); // repeat every 10s
-}, 10000);
+      let lastUserInteraction = Date.now();
 
+      // mark user manual actions
+      document.addEventListener("click", () => {
+        lastUserInteraction = Date.now();
+      });
+
+      // small helper so overlay doesn’t clash
+      function markOverlayAnimating() {
+        overlay.classList.add("animating");
+        setTimeout(() => overlay.classList.remove("animating"), 250);
+      }
+
+      // Patch show/hide UI transitions (non-invasive)
+      const _showClickUI = showClickUI;
+      showClickUI = function (...args) {
+        markOverlayAnimating();
+        return _showClickUI.apply(this, args);
+      };
+
+      const _hideClickUI = hideClickUI;
+      hideClickUI = function (...args) {
+        markOverlayAnimating();
+        return _hideClickUI.apply(this, args);
+      };
+
+      // AUTOPLAY
+      function clickRandomStampSafely() {
+        if (!systemStable()) return;
+
+        const stamps = [...document.querySelectorAll(".stamp")];
+        if (!stamps.length) return;
+
+        const btn = stamps[Math.floor(Math.random() * stamps.length)];
+        btn.click();
+      }
+
+      setInterval(clickRandomStampSafely, 10000);
     </script>
   </body>
 </html>

@@ -129,6 +129,17 @@
         outline-offset: 2px;
       }
 
+      .stamps-topright {
+  position: absolute;
+  right: 6px;
+  top: 6px;
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  z-index: 3;
+}
+
+
       .note {
         position: absolute;
         inset: 0;
@@ -286,9 +297,45 @@
           alts: [
             {
               stamp: "Yomna Abdelkader",
-              src: "002_yomna.png",
-              big: "image02_bigA.png",
-              text: "Lorem ipsum...",
+              src: "822_01.png",
+              big: "yomna_01.jpg",
+              text: " ",
+              color: "gray",
+            },
+
+            {
+              stamp: "01",
+              src: "822_02.png",
+              big: "yomna_02.jpg",
+              text: " ",
+              color: "gray",
+            },
+            {
+              stamp: "02",
+              src: "822_03.png",
+              big: "yomna_03.jpg",
+              text: " ",
+              color: "gray",
+            },
+            {
+              stamp: "03",
+              src: "822_04.png",
+              big: "yomna_04.jpg",
+              text: " ",
+              color: "gray",
+            },
+            {
+              stamp: "04",
+              src: "822_01.png",
+              big: "yomna_05.jpg",
+              text: " ",
+              color: "gray",
+            },
+            {
+              stamp: "05",
+              src: "822_02.png",
+              big: "yomna_06.jpg",
+              text: " ",
               color: "gray",
             },
           ],
@@ -296,7 +343,29 @@
         { base: "003_pollak.png", alts: [] },
         {
           base: "004_pollak.png",
-          alts: [],
+          alts: [
+            {
+              stamp: "Mati Schank",
+              src: "822_03.png",
+              big: "mati_01.jpg",
+              text: " ",
+              color: "gray",
+            },
+            {
+              stamp: "01",
+              src: "822_04.png",
+              big: "mati_02.jpg",
+              text: " ",
+              color: "gray",
+            },
+            {
+              stamp: "02",
+              src: "822_01.png",
+              big: "mati_03.jpg",
+              text: " ",
+              color: "gray",
+            },
+          ],
         },
         { base: "005_pollak.png", alts: [] },
         {
@@ -304,9 +373,23 @@
           alts: [
             {
               stamp: "Adrienne Bennett",
-              src: "006_adrienne.png",
-              big: "adrienne_big_822.png",
-              text: "Lorem ipsum...",
+              src: "822_01.png",
+              big: "adrienne_06.jpg",
+              text: " ",
+              color: "gray",
+            },
+            {
+              stamp: "01",
+              src: "822_02.png",
+              big: "adrienne_06.jpg",
+              text: " ",
+              color: "gray",
+            },
+            {
+              stamp: "02",
+              src: "822_03.png",
+              big: "adrienne_07.jpg",
+              text: " ",
               color: "gray",
             },
           ],
@@ -369,9 +452,37 @@
             },
             {
               stamp: "Charles O'Leary",
-              src: "011_charles.png",
-              big: "charles_big_822.png",
-              text: "Lorem ipsum...",
+              src: "822_04.png",
+              big: "charles_01.jpg",
+              text: " ",
+              color: "gray",
+            },
+            {
+              stamp: "01",
+              src: "822_01.png",
+              big: "charles_02.jpg",
+              text: " ",
+              color: "gray",
+            },
+            {
+              stamp: "02",
+              src: "822_02.png",
+              big: "charles_03.jpg",
+              text: " ",
+              color: "gray",
+            },
+            {
+              stamp: "03",
+              src: "822_03.png",
+              big: "charles_04.jpg",
+              text: " ",
+              color: "gray",
+            },
+            {
+              stamp: "04",
+              src: "822_04.png",
+              big: "charles_05.jpg",
+              text: " ",
               color: "gray",
             },
           ],
@@ -400,10 +511,38 @@
               color: "yellow",
             },
             {
-              stamp: "Mati Schank",
-              src: "014_mati.png",
-              big: "mati_big_822.jpeg",
-              text: "Lorem ipsum...",
+              stamp: "Adrienne Bennett",
+              src: "822_02.png",
+              big: "adrienne_01.jpg",
+              text: " ",
+              color: "gray",
+            },
+            {
+              stamp: "01",
+              src: "822_03.png",
+              big: "adrienne_02.jpg",
+              text: " ",
+              color: "gray",
+            },
+            {
+              stamp: "02",
+              src: "822_04.png",
+              big: "adrienne_03.jpg",
+              text: " ",
+              color: "gray",
+            },
+            {
+              stamp: "03",
+              src: "822_01.png",
+              big: "adrienne_04.jpg",
+              text: " ",
+              color: "gray",
+            },
+            {
+              stamp: "04",
+              src: "822_02.png",
+              big: "adrienne_05.jpg",
+              text: " ",
               color: "gray",
             },
           ],
@@ -610,80 +749,84 @@
         });
 
         if (item.alts && item.alts.length) {
-          const list = document.createElement("div");
-          list.className = "stamps";
+  const bottomList = document.createElement("div");
+  bottomList.className = "stamps";
 
-          item.alts.forEach((a) => {
-            const btn = document.createElement("button");
-            btn.type = "button";
-            btn.className = "stamp";
-            const color =
-              a.color === "gray" || a.color === "yellow" ? a.color : "yellow";
-            btn.classList.add(`stamp--${color}`);
-            btn.textContent = a.stamp;
+  const topRightList = document.createElement("div");
+  topRightList.className = "stamps-topright";
 
-            btn.addEventListener("mouseenter", () => {
-              setAltForCell(i, a.src);
-            });
+  item.alts.forEach((a) => {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "stamp";
 
-            btn.addEventListener("mouseleave", () => {
-              if (latchedAltByCell[i]) {
-                setAltForCell(i, latchedAltByCell[i]);
-              } else {
-                hideAltForCell(i);
-              }
-            });
+    const color =
+      a.color === "gray" || a.color === "yellow" ? a.color : "yellow";
+    btn.classList.add(`stamp--${color}`);
+    btn.textContent = a.stamp;
 
-            btn.addEventListener("click", (ev) => {
-              ev.stopPropagation();
+    // HOVER
+    btn.addEventListener("mouseenter", () => setAltForCell(i, a.src));
+    btn.addEventListener("mouseleave", () => {
+      latchedAltByCell[i]
+        ? setAltForCell(i, latchedAltByCell[i])
+        : hideAltForCell(i);
+    });
 
-              const already =
-                btn.classList.contains("active") &&
-                overlay.classList.contains("show");
-              if (already) {
-                hideClickUI();
-                return;
-              }
+    // CLICK
+    btn.addEventListener("click", (ev) => {
+      // KEEP YOUR ORIGINAL ENTIRE CLICK HANDLER HERE
+      // (copy/paste from your existing code)
+      ev.stopPropagation();
 
-              document
-                .querySelectorAll(".stamp.active")
-                .forEach(resetStampVisual);
+      const already =
+        btn.classList.contains("active") &&
+        overlay.classList.contains("show");
+      if (already) {
+        hideClickUI();
+        return;
+      }
 
-              if (activeCellIndex !== null && activeCellIndex !== i) {
-                hideAltForCell(activeCellIndex);
-                latchedAltByCell[activeCellIndex] = null;
-              }
+      document.querySelectorAll(".stamp.active").forEach(resetStampVisual);
 
-              btn.classList.add("active");
-              setAltForCell(i, a.src);
-              latchedAltByCell[i] = a.src;
-              activeCellIndex = i;
+      if (activeCellIndex !== null && activeCellIndex !== i) {
+        hideAltForCell(activeCellIndex);
+        latchedAltByCell[activeCellIndex] = null;
+      }
 
-              const rect = cell.getBoundingClientRect();
-              const side =
-                rect.left + rect.width / 2 < window.innerWidth / 2
-                  ? "left"
-                  : "right";
+      btn.classList.add("active");
+      setAltForCell(i, a.src);
+      latchedAltByCell[i] = a.src;
+      activeCellIndex = i;
 
-              if (color === "yellow") {
-                stopOrbit(); // in case a gray orbit was running
-                overlayImg.style.display = "block";
+      const rect = cell.getBoundingClientRect();
+      const side =
+        rect.left + rect.width / 2 < window.innerWidth / 2
+          ? "left"
+          : "right";
 
-                const bigSrc = a.big || a.src || "";
-                const text = a.text || a.stamp || "";
-                showClickUI(side, bigSrc, text);
-              } else {
-                overlayImg.style.display = "none";
-                showClickUI(side, "", ""); // positions overlay & hides left/right click-text
-                startOrbit();
-              }
-            });
+      // Always show image now
+      stopOrbit();
+      overlayImg.style.display = "block";
+      const bigSrc = a.big || a.src || "";
+      const text = a.text || a.stamp || "";
+      showClickUI(side, bigSrc, text);
+    });
 
-            list.appendChild(btn);
-          });
+    // ⬇️ NEW: number-stamps → top-right
+    const isNumberStamp = /^[0-9]{2}$/.test(a.stamp);
 
-          cell.appendChild(list);
-        }
+    if (isNumberStamp) {
+      topRightList.appendChild(btn);
+    } else {
+      bottomList.appendChild(btn);
+    }
+  });
+
+  if (bottomList.children.length) cell.appendChild(bottomList);
+  if (topRightList.children.length) cell.appendChild(topRightList);
+}
+
       });
 
       const isEmptyArr = gridData.map((item) => !item || !item.base);
@@ -743,6 +886,29 @@
       window.addEventListener("resize", () => {
         if (overlay.classList.contains("show")) hideClickUI();
       });
+      /* ---------------- AUTO-PLAY: RANDOM STAMP CLICK EVERY 10 SECONDS ---------------- */
+
+function getAllStamps() {
+  return [...document.querySelectorAll(".stamp")];
+}
+
+function clickRandomStamp() {
+  const stamps = getAllStamps();
+  if (stamps.length === 0) return;
+
+  // pick a random clickable stamp
+  const btn = stamps[Math.floor(Math.random() * stamps.length)];
+
+  // simulate a real click
+  btn.click();
+}
+
+// start autoplay 10 seconds after page load, then every 10 seconds
+setTimeout(() => {
+  clickRandomStamp(); // first auto-click
+  setInterval(clickRandomStamp, 10000); // repeat every 10s
+}, 10000);
+
     </script>
   </body>
 </html>
